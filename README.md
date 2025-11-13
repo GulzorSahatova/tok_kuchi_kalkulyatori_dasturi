@@ -1,0 +1,1 @@
+# tok_kuchi_kalkulyatori_dasturi
