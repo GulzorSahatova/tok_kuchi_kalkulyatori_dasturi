@@ -29,31 +29,27 @@ class TokKuchiHomePage extends StatefulWidget {
 }
 
 class _TokKuchiHomePageState extends State<TokKuchiHomePage> {
-  final TextEditingController _controller = TextEditingController();
-  String _selectedUnit = 'Amper (A)';
-  String _result = '';
+  final TextEditingController _quvvatController = TextEditingController();
+  final TextEditingController _kuchlanishController = TextEditingController();
 
-  final Map<String, double> _unitValues = {
-    'Amper (A)': 1,
-    'MilliAmper (mA)': 0.001,
-    'KiloAmper (kA)': 1000,
-  };
+  double? _tokKuchi;
 
   void _hisobla() {
-    double? value = double.tryParse(_controller.text);
-    if (value == null) {
-      setState(() => _result = 'Iltimos, son kiriting.');
-      return;
+    final double? p = double.tryParse(_quvvatController.text);
+    final double? u = double.tryParse(_kuchlanishController.text);
+
+    if (p != null && u != null && u != 0) {
+      setState(() {
+        _tokKuchi = p / u;
+      });
+    } else {
+      setState(() {
+        _tokKuchi = null;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Iltimos, to‘g‘ri qiymat kiriting!")),
+      );
     }
-
-    double inAmper = value * _unitValues[_selectedUnit]!;
-    String natija = '''
-${inAmper} A
-${inAmper * 1000} mA
-${inAmper / 1000} kA
-''';
-
-    setState(() => _result = natija);
   }
 
   @override
@@ -62,51 +58,47 @@ ${inAmper / 1000} kA
       appBar: AppBar(
         title: const Text('Tok kuchi kalkulyatori'),
         centerTitle: true,
+        backgroundColor: Colors.blueAccent,
+        foregroundColor: Colors.white,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
-              'Qiymatni kiriting:',
-              style: TextStyle(fontSize: 18),
-            ),
-            const SizedBox(height: 8),
             TextField(
-              controller: _controller,
+              controller: _quvvatController,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
+                labelText: 'Quvvat (W)',
                 border: OutlineInputBorder(),
-                hintText: 'Masalan: 2.5',
               ),
             ),
-            const SizedBox(height: 12),
-            DropdownButton<String>(
-              value: _selectedUnit,
-              isExpanded: true,
-              items: _unitValues.keys.map((String unit) {
-                return DropdownMenuItem<String>(
-                  value: unit,
-                  child: Text(unit),
-                );
-              }).toList(),
-              onChanged: (value) {
-                setState(() {
-                  _selectedUnit = value!;
-                });
-              },
+            const SizedBox(height: 20),
+            TextField(
+              controller: _kuchlanishController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: 'Kuchlanish (V)',
+                border: OutlineInputBorder(),
+              ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 30),
             ElevatedButton(
               onPressed: _hisobla,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blueAccent,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 30),
+              ),
               child: const Text('Hisoblash'),
             ),
-            const SizedBox(height: 20),
-            Text(
-              _result,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
+            const SizedBox(height: 30),
+            if (_tokKuchi != null)
+              Text(
+                'Tok kuchi: ${_tokKuchi!.toStringAsFixed(2)} A',
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
           ],
         ),
       ),
